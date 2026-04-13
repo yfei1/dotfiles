@@ -1,0 +1,57 @@
+{
+  "env": {
+    "DISABLE_AUTOUPDATER": "1",
+    "DISABLE_BUG_COMMAND": "1",
+    "DISABLE_COST_WARNINGS": "1",
+    "DISABLE_DOCTOR_COMMAND": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_INSTALLATION_CHECKS": "1",
+    "DISABLE_INSTALL_GITHUB_APP_COMMAND": "1",
+    "DISABLE_LOGIN_COMMAND": "1",
+    "DISABLE_LOGOUT_COMMAND": "1",
+    "DISABLE_MIGRATE_INSTALLER_COMMAND": "1",
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_UPGRADE_COMMAND": "1",
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "ANTHROPIC_MODEL": "sonnet",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "haiku",
+    "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "0",
+    "BASH_DEFAULT_TIMEOUT_MS": "900000",
+    "BASH_MAX_TIMEOUT_MS": "900000",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "WebFetch(domain:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "WebSearch"
+    ]
+  },
+  "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/yufanfei/.config/ccstatusline/statusline.sh",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "code-review@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
+  },
+  "skipWebFetchPreflight": true,
+  "voiceEnabled": true
+}
