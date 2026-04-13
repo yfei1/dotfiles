@@ -25,9 +25,9 @@ all: deps build-moltis install shell
 # Dependencies
 # ══════════════════════════════════════════════════════════════════
 
-.PHONY: deps deps-homebrew deps-brew deps-font deps-cask deps-rust deps-voice
+.PHONY: deps deps-homebrew deps-brew deps-font deps-cask deps-rust deps-docker deps-voice
 
-deps: deps-homebrew deps-brew deps-font deps-cask deps-rust deps-voice
+deps: deps-homebrew deps-brew deps-font deps-cask deps-rust deps-docker deps-voice
 	@echo "✓ All dependencies installed"
 
 deps-homebrew:
@@ -61,10 +61,19 @@ deps-rust:
 		echo "Rust toolchain already installed"; \
 	fi
 
+deps-docker: deps-homebrew
+	@if ! command -v docker >/dev/null 2>&1; then \
+		echo "Installing Docker Desktop..."; \
+		brew install --cask docker; \
+		echo "  ⚠ Open Docker.app once to finish setup"; \
+	else \
+		echo "Docker already installed"; \
+	fi
+
 deps-voice: deps-homebrew
-	@echo "Installing voice dependencies (whisper-cpp)..."
+	@echo "Installing voice dependencies..."
+	@# STT: whisper-cpp + model
 	brew install whisper-cpp 2>/dev/null || true
-	@# Download whisper large-v3 model if not present
 	@mkdir -p $(HOME_DIR)/.local/share/whisper-cpp/models
 	@if [ ! -f $(HOME_DIR)/.local/share/whisper-cpp/models/ggml-large-v3.bin ]; then \
 		echo "Downloading whisper large-v3 model (~3GB)..."; \
@@ -151,6 +160,40 @@ install-moltis:
 			$(CURDIR)/moltis/moltis.toml.template \
 			> $(HOME_DIR)/.config/moltis/moltis.toml
 	@echo "  ✓ moltis.toml rendered with secrets from .env"
+	@# TTS: Kokoro docker stack
+	@mkdir -p $(HOME_DIR)/.moltis/kokoro
+	@cp $(CURDIR)/moltis/kokoro/docker-compose.yml $(HOME_DIR)/.moltis/kokoro/docker-compose.yml
+	@cp $(CURDIR)/moltis/kokoro/Dockerfile.shim $(HOME_DIR)/.moltis/kokoro/Dockerfile.shim
+	@cp $(CURDIR)/moltis/kokoro/shim.py $(HOME_DIR)/.moltis/kokoro/shim.py
+	@echo "  ✓ Kokoro TTS stack copied to ~/.moltis/kokoro/"
+	@echo "  Run 'make kokoro-up' to start the TTS service"
+
+# ══════════════════════════════════════════════════════════════════
+# Kokoro TTS service
+# ══════════════════════════════════════════════════════════════════
+
+KOKORO_DIR := $(HOME_DIR)/.moltis/kokoro
+
+.PHONY: kokoro-up kokoro-down kokoro-status
+
+kokoro-up:
+	@if ! command -v docker >/dev/null 2>&1; then \
+		echo "Error: Docker not installed. Run 'make deps-docker' first."; \
+		exit 1; \
+	fi
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "Error: Docker daemon not running. Start Docker Desktop first."; \
+		exit 1; \
+	fi
+	@echo "Starting Kokoro TTS stack..."
+	cd $(KOKORO_DIR) && docker compose up -d --build
+	@echo "✓ Kokoro TTS running on localhost:8881"
+
+kokoro-down:
+	cd $(KOKORO_DIR) && docker compose down
+
+kokoro-status:
+	@cd $(KOKORO_DIR) && docker compose ps 2>/dev/null || echo "Kokoro not running"
 
 # ══════════════════════════════════════════════════════════════════
 # Shell aliases
